@@ -1,0 +1,193 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import type { MetricType } from "@/lib/types/database";
+import type { KPIData, BrandBreakdown, OrganicPaidEntry, DashboardData } from "@/lib/types/dashboard";
+import { METRIC_LABELS } from "@/lib/constants";
+import { deltaAbsolute, deltaPercent } from "@/lib/utils/format";
+
+export async function GET(request: Request) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const currentYear = parseInt(searchParams.get("currentYear") || "2025");
+  const previousYear = parseInt(searchParams.get("previousYear") || "2024");
+
+  // Fetch all influence data for both years
+  const { data: rawData, error } = await supabase
+    .from("influence_data")
+    .select("*")
+    .in("year", [currentYear, previousYear]);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  if (!rawData || rawData.length === 0) {
+    const emptyData: DashboardData = {
+      kpis: [],
+      brandBreakdown: {} as Record<MetricType, BrandBreakdown[]>,
+      organicPaid: [],
+      lastUpload: null,
+    };
+    return NextResponse.json(emptyData);
+  }
+
+  // Build KPIs (aggregate "total" source by year/metric/entity)
+  const metricKeys: MetricType[] = [
+    "influencers_activated",
+    "video_views",
+    "engagement",
+  ];
+
+  const kpiAgg: Record<
+    number,
+    Record<MetricType, { gseb: number; competitor: number }>
+  > = {};
+
+  for (const year of [currentYear, previousYear]) {
+    kpiAgg[year] = {} as Record<
+      MetricType,
+      { gseb: number; competitor: number }
+    >;
+    for (const m of metricKeys) {
+      kpiAgg[year][m] = { gseb: 0, competitor: 0 };
+    }
+  }
+
+  for (const row of rawData) {
+    if (row.source !== "total") continue;
+    const year = row.year as number;
+    const metric = row.metric as MetricType;
+    const entity = row.entity as "gseb" | "competitor";
+    if (kpiAgg[year]?.[metric]) {
+      kpiAgg[year][metric][entity] += Number(row.value);
+    }
+  }
+
+  const kpis: KPIData[] = metricKeys.map((metric) => {
+    const current = kpiAgg[currentYear]?.[metric] || { gseb: 0, competitor: 0 };
+    const previous = kpiAgg[previousYear]?.[metric] || {
+      gseb: 0,
+      competitor: 0,
+    };
+    return {
+      metric,
+      label: METRIC_LABELS[metric] || metric,
+      current,
+      previous,
+      deltaAbsolute: {
+        gseb: deltaAbsolute(current.gseb, previous.gseb),
+        competitor: deltaAbsolute(current.competitor, previous.competitor),
+      },
+      deltaPercent: {
+        gseb: deltaPercent(current.gseb, previous.gseb),
+        competitor: deltaPercent(current.competitor, previous.competitor),
+      },
+    };
+  });
+
+  // Brand breakdown (per metric, only "total" source, current year)
+  const brandBreakdown: Record<MetricType, BrandBreakdown[]> = {
+    influencers_activated: [],
+    video_views: [],
+    engagement: [],
+  };
+
+  const brandAgg: Record<
+    MetricType,
+    Record<string, { gseb: number; competitor: number }>
+  > = {
+    influencers_activated: {},
+    video_views: {},
+    engagement: {},
+  };
+
+  for (const row of rawData) {
+    if (row.source !== "total" || row.year !== currentYear) continue;
+    const metric = row.metric as MetricType;
+    const brand = row.brand as string;
+    const entity = row.entity as "gseb" | "competitor";
+
+    if (!brandAgg[metric][brand]) {
+      brandAgg[metric][brand] = { gseb: 0, competitor: 0 };
+    }
+    brandAgg[metric][brand][entity] += Number(row.value);
+  }
+
+  for (const metric of metricKeys) {
+    brandBreakdown[metric] = Object.entries(brandAgg[metric])
+      .map(([brand, values]) => ({
+        brand,
+        gseb: values.gseb,
+        competitor: values.competitor,
+      }))
+      .sort((a, b) => (b.gseb + b.competitor) - (a.gseb + a.competitor));
+  }
+
+  // Organic vs Paid breakdown
+  const organicPaidMap: Record<
+    string,
+    { currentValue: number; previousValue: number }
+  > = {};
+
+  for (const row of rawData) {
+    if (row.source === "total") continue;
+    const key = `${row.brand}|${row.entity}|${row.source}|${row.metric}`;
+    if (!organicPaidMap[key]) {
+      organicPaidMap[key] = { currentValue: 0, previousValue: 0 };
+    }
+    if (row.year === currentYear) {
+      organicPaidMap[key].currentValue += Number(row.value);
+    } else {
+      organicPaidMap[key].previousValue += Number(row.value);
+    }
+  }
+
+  const organicPaid: OrganicPaidEntry[] = Object.entries(organicPaidMap).map(
+    ([key, values]) => {
+      const [brand, entity, source, metric] = key.split("|");
+      return {
+        brand,
+        entity: entity as OrganicPaidEntry["entity"],
+        source: source as OrganicPaidEntry["source"],
+        metric: metric as MetricType,
+        currentValue: values.currentValue,
+        previousValue: values.previousValue,
+        deltaAbsolute: deltaAbsolute(values.currentValue, values.previousValue),
+        deltaPercent: deltaPercent(values.currentValue, values.previousValue),
+      };
+    }
+  );
+
+  // Last upload info
+  const { data: lastUploadData } = await supabase
+    .from("uploads")
+    .select("id, file_name, created_at")
+    .eq("status", "completed")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  const dashboardData: DashboardData = {
+    kpis,
+    brandBreakdown,
+    organicPaid,
+    lastUpload: lastUploadData
+      ? {
+          id: lastUploadData.id,
+          fileName: lastUploadData.file_name,
+          createdAt: lastUploadData.created_at,
+        }
+      : null,
+  };
+
+  return NextResponse.json(dashboardData);
+}
