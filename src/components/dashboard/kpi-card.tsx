@@ -45,42 +45,24 @@ function DeltaIndicator({
 }
 
 export function KPICard({ kpi }: KPICardProps) {
-  const totalCurrent = kpi.current.gseb + kpi.current.competitor;
-  const totalPrevious = kpi.previous.gseb + kpi.previous.competitor;
-  const totalDeltaPct =
-    totalPrevious === 0
-      ? totalCurrent === 0
-        ? 0
-        : 100
-      : ((totalCurrent - totalPrevious) / totalPrevious) * 100;
-
   return (
     <Card>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Header */}
-          <div className="flex items-start justify-between">
-            <h3 className="text-sm font-semibold text-seb-gray">{kpi.label}</h3>
-            <DeltaIndicator
-              deltaAbs={totalCurrent - totalPrevious}
-              deltaPct={totalDeltaPct}
-            />
-          </div>
+          <h3 className="text-sm font-semibold text-seb-gray">{kpi.label}</h3>
 
-          {/* Total value */}
-          <p className="text-3xl font-bold text-foreground">
-            {formatNumber(totalCurrent)}
-          </p>
-
-          {/* GSEB vs Competitors */}
-          <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border">
+          {/* GSEB vs Competitors - side by side */}
+          <div className="grid grid-cols-2 gap-4">
             {/* GSEB */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="w-2 h-2 rounded-full bg-seb-red" />
-                <span className="text-xs text-seb-gray">Groupe SEB</span>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-seb-red" />
+                <span className="text-xs font-medium text-seb-gray">
+                  Groupe SEB
+                </span>
               </div>
-              <p className="text-lg font-semibold text-foreground">
+              <p className="text-2xl font-bold text-foreground">
                 {formatNumber(kpi.current.gseb)}
               </p>
               <DeltaIndicator
@@ -90,12 +72,14 @@ export function KPICard({ kpi }: KPICardProps) {
             </div>
 
             {/* Competitors */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="w-2 h-2 rounded-full bg-seb-gray" />
-                <span className="text-xs text-seb-gray">Competitors</span>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-seb-gray" />
+                <span className="text-xs font-medium text-seb-gray">
+                  Competitors
+                </span>
               </div>
-              <p className="text-lg font-semibold text-foreground">
+              <p className="text-2xl font-bold text-foreground">
                 {formatNumber(kpi.current.competitor)}
               </p>
               <DeltaIndicator
