@@ -1,16 +1,16 @@
-import XLSX from "xlsx-js-style";
 import type { MetricType, EntityType, SourceType } from "@/lib/types/database";
 import type { ParsedRow, ParseResult } from "./types";
 import { validateSheetNames } from "./validators";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
  * Detect if a cell has red font color.
  * SEB Red is #DD2D1F (or Excel red FF0000).
  * We check if the red channel is dominant (R > 150, G < 100, B < 100).
  */
-function isRedFont(cell: XLSX.CellObject): boolean {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const style = (cell as any)?.s;
+function isRedFont(cell: any): boolean {
+  const style = cell?.s;
   if (!style?.font?.color) return false;
 
   const color = style.font.color;
@@ -26,8 +26,6 @@ function isRedFont(cell: XLSX.CellObject): boolean {
     return r > 150 && g < 100 && b < 100;
   }
 
-  // Handle theme-based colors: theme index for red is often not 0 or 1
-  // Conservative: only direct RGB is trusted as red
   return false;
 }
 
@@ -47,16 +45,13 @@ function getSourceType(label: string): SourceType | null {
  */
 function extractBrand(label: string): string {
   const trimmed = label.trim();
-  // Remove known suffixes and clean up
-  return trimmed
-    .replace(/\s+(All|Organic|Paid)$/i, "")
-    .trim();
+  return trimmed.replace(/\s+(All|Organic|Paid)$/i, "").trim();
 }
 
 /**
  * Safely get numeric value from a cell.
  */
-function numericValue(cell: XLSX.CellObject | undefined): number {
+function numericValue(cell: any): number {
   if (!cell) return 0;
   const val = cell.v;
   if (typeof val === "number") return val;
@@ -71,7 +66,8 @@ function numericValue(cell: XLSX.CellObject | undefined): number {
  * Parse a single worksheet and extract influence data rows.
  */
 function parseSheet(
-  worksheet: XLSX.WorkSheet,
+  XLSX: any,
+  worksheet: any,
   year: number
 ): ParsedRow[] {
   const rows: ParsedRow[] = [];
@@ -80,7 +76,6 @@ function parseSheet(
 
   const range = XLSX.utils.decode_range(ref);
 
-  // Start from row 1 (skip header at row 0)
   for (let rowIdx = range.s.r + 1; rowIdx <= range.e.r; rowIdx++) {
     const cellA = worksheet[XLSX.utils.encode_cell({ r: rowIdx, c: 0 })];
     if (!cellA || !cellA.v) continue;
@@ -94,11 +89,8 @@ function parseSheet(
 
     const entity: EntityType = isRedFont(cellA) ? "gseb" : "competitor";
 
-    // Column B = Activated Influencers
     const cellB = worksheet[XLSX.utils.encode_cell({ r: rowIdx, c: 1 })];
-    // Column C = Engagement
     const cellC = worksheet[XLSX.utils.encode_cell({ r: rowIdx, c: 2 })];
-    // Column D = Video Views
     const cellD = worksheet[XLSX.utils.encode_cell({ r: rowIdx, c: 3 })];
 
     const metrics: { metric: MetricType; value: number }[] = [
@@ -124,7 +116,7 @@ function parseSheet(
 }
 
 /**
- * Build summary from parsed rows: aggregate per year/metric/entity.
+ * Build summary from parsed rows.
  */
 function buildSummary(
   rows: ParsedRow[]
@@ -141,7 +133,6 @@ function buildSummary(
   ];
 
   for (const row of rows) {
-    // Only aggregate "total" source (the "All" rows) for the executive summary
     if (row.source !== "total") continue;
 
     if (!summary[row.year]) {
@@ -162,8 +153,12 @@ function buildSummary(
 
 /**
  * Main parse function: takes an Excel file buffer and returns structured data.
+ * Uses dynamic import to avoid bundling xlsx-js-style (which uses __dirname).
  */
-export function parseExcelFile(buffer: Buffer): ParseResult {
+export async function parseExcelFile(buffer: Buffer): Promise<ParseResult> {
+  // Dynamic import — never statically analyzed by the bundler
+  const XLSX = (await import("xlsx-js-style")).default || (await import("xlsx-js-style"));
+
   const workbook = XLSX.read(buffer, {
     type: "buffer",
     cellStyles: true,
@@ -185,7 +180,7 @@ export function parseExcelFile(buffer: Buffer): ParseResult {
     sheetNames.push(sheetName);
     yearValues.push(year);
 
-    const rows = parseSheet(worksheet, year);
+    const rows = parseSheet(XLSX, worksheet, year);
     allRows.push(...rows);
   }
 

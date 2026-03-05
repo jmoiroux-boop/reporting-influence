@@ -97,7 +97,7 @@ export async function POST(request: Request) {
     // 7. Parse Excel
     let parseResult;
     try {
-      parseResult = parseExcelFile(buffer);
+      parseResult = await parseExcelFile(buffer);
     } catch (parseError) {
       // Update upload status to failed
       await adminClient
