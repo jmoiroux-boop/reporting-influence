@@ -162,6 +162,21 @@ export function DashboardContent({ isAdmin }: DashboardContentProps) {
         />
         <CommentSection section="organic_paid" isAdmin={isAdmin} />
       </section>
+
+      {/* Footer / Source */}
+      <footer className="border-t border-border pt-6 pb-4 space-y-2 text-[11px] text-seb-gray-light leading-relaxed">
+        <p>
+          <span className="font-semibold text-seb-gray">Source:</span> Traackr
+          Benchmark —{" "}
+          <span className="font-semibold text-seb-gray">Scope:</span> FR, DE,
+          IT, SP, UK, US | Krups, Moulinex, Tefal, Rowenta, Dreame, Shark,
+          Ninja Kitchen, Philips (excluded Dyson).
+        </p>
+        <p>
+          Please note that the benchmark on Traackr is updated on a monthly
+          basis, as the underlying influencer database continuously evolves.
+        </p>
+      </footer>
     </div>
   );
 }
