@@ -8,14 +8,17 @@ import type { KPIData } from "@/lib/types/dashboard";
 
 interface KPICardProps {
   kpi: KPIData;
+  previousLabel: string;
 }
 
 function DeltaIndicator({
   deltaAbs,
   deltaPct,
+  previousLabel,
 }: {
   deltaAbs: number;
   deltaPct: number;
+  previousLabel: string;
 }) {
   const isPositive = deltaPct > 0;
   const isNeutral = deltaPct === 0;
@@ -40,11 +43,14 @@ function DeltaIndicator({
       <span className="text-[10px] opacity-70">
         ({formatDeltaAbsolute(deltaAbs)})
       </span>
+      <span className="text-[10px] opacity-60 ml-0.5">
+        vs {previousLabel}
+      </span>
     </div>
   );
 }
 
-export function KPICard({ kpi }: KPICardProps) {
+export function KPICard({ kpi, previousLabel }: KPICardProps) {
   return (
     <Card>
       <CardContent>
@@ -68,6 +74,7 @@ export function KPICard({ kpi }: KPICardProps) {
               <DeltaIndicator
                 deltaAbs={kpi.deltaAbsolute.gseb}
                 deltaPct={kpi.deltaPercent.gseb}
+                previousLabel={previousLabel}
               />
             </div>
 
@@ -85,6 +92,7 @@ export function KPICard({ kpi }: KPICardProps) {
               <DeltaIndicator
                 deltaAbs={kpi.deltaAbsolute.competitor}
                 deltaPct={kpi.deltaPercent.competitor}
+                previousLabel={previousLabel}
               />
             </div>
           </div>

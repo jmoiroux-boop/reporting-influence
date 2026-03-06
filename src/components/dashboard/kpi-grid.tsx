@@ -5,9 +5,10 @@ import type { KPIData } from "@/lib/types/dashboard";
 
 interface KPIGridProps {
   kpis: KPIData[];
+  previousLabel: string;
 }
 
-export function KPIGrid({ kpis }: KPIGridProps) {
+export function KPIGrid({ kpis, previousLabel }: KPIGridProps) {
   if (kpis.length === 0) {
     return (
       <div className="text-center py-12">
@@ -21,7 +22,7 @@ export function KPIGrid({ kpis }: KPIGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {kpis.map((kpi) => (
-        <KPICard key={kpi.metric} kpi={kpi} />
+        <KPICard key={kpi.metric} kpi={kpi} previousLabel={previousLabel} />
       ))}
     </div>
   );

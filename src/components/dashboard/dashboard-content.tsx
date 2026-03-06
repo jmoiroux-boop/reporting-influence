@@ -104,7 +104,7 @@ export function DashboardContent({ isAdmin }: DashboardContentProps) {
 
       {/* KPI Cards */}
       <section>
-        <KPIGrid kpis={data.kpis} />
+        <KPIGrid kpis={data.kpis} previousLabel={previousLabel} />
         <CommentSection section="influencers_activated" isAdmin={isAdmin} />
       </section>
 
