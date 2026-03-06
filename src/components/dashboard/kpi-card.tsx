@@ -24,28 +24,30 @@ function DeltaIndicator({
   const isNeutral = deltaPct === 0;
 
   return (
-    <div
-      className={cn(
-        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
-        isPositive && "bg-green-50 text-green-700",
-        !isPositive && !isNeutral && "bg-red-50 text-red-700",
-        isNeutral && "bg-gray-50 text-gray-600"
-      )}
-    >
-      {isPositive ? (
-        <TrendingUp className="h-3 w-3" />
-      ) : isNeutral ? (
-        <Minus className="h-3 w-3" />
-      ) : (
-        <TrendingDown className="h-3 w-3" />
-      )}
-      <span>{formatDeltaPercent(deltaPct)}</span>
-      <span className="text-[10px] opacity-70">
-        ({formatDeltaAbsolute(deltaAbs)})
-      </span>
-      <span className="text-[10px] opacity-60 ml-0.5">
+    <div className="space-y-0.5">
+      <div
+        className={cn(
+          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
+          isPositive && "bg-green-50 text-green-700",
+          !isPositive && !isNeutral && "bg-red-50 text-red-700",
+          isNeutral && "bg-gray-50 text-gray-600"
+        )}
+      >
+        {isPositive ? (
+          <TrendingUp className="h-3 w-3" />
+        ) : isNeutral ? (
+          <Minus className="h-3 w-3" />
+        ) : (
+          <TrendingDown className="h-3 w-3" />
+        )}
+        <span>{formatDeltaPercent(deltaPct)}</span>
+        <span className="text-[10px] opacity-70">
+          ({formatDeltaAbsolute(deltaAbs)})
+        </span>
+      </div>
+      <p className="text-[9px] text-seb-gray-light pl-1">
         vs {previousLabel}
-      </span>
+      </p>
     </div>
   );
 }
