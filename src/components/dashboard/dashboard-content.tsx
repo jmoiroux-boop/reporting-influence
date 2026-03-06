@@ -142,7 +142,9 @@ export function DashboardContent({ isAdmin }: DashboardContentProps) {
         <BrandBarChart
           data={data.brandBreakdown[selectedMetric] || []}
           title={METRIC_LABELS[selectedMetric]}
-          subtitle={`T1 ${currentYear} - GSEB vs Competitors`}
+          subtitle={`T1 ${currentYear} vs T1 ${previousYear} — GSEB vs Competitors`}
+          currentYear={currentYear}
+          previousYear={previousYear}
         />
         <CommentSection section="brand_breakdown" isAdmin={isAdmin} />
       </section>

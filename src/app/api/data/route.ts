@@ -94,16 +94,17 @@ export async function GET(request: Request) {
     };
   });
 
-  // Brand breakdown (per metric, only "total" source, current year)
+  // Brand breakdown (per metric, "total" source, both years)
   const brandBreakdown: Record<MetricType, BrandBreakdown[]> = {
     influencers_activated: [],
     video_views: [],
     engagement: [],
   };
 
+  // Aggregate by metric → brand → { entity, currentValue, previousValue }
   const brandAgg: Record<
     MetricType,
-    Record<string, { gseb: number; competitor: number }>
+    Record<string, { entity: "gseb" | "competitor"; currentValue: number; previousValue: number }>
   > = {
     influencers_activated: {},
     video_views: {},
@@ -111,25 +112,30 @@ export async function GET(request: Request) {
   };
 
   for (const row of rawData) {
-    if (row.source !== "total" || row.year !== currentYear) continue;
+    if (row.source !== "total") continue;
     const metric = row.metric as MetricType;
     const brand = row.brand as string;
     const entity = row.entity as "gseb" | "competitor";
 
     if (!brandAgg[metric][brand]) {
-      brandAgg[metric][brand] = { gseb: 0, competitor: 0 };
+      brandAgg[metric][brand] = { entity, currentValue: 0, previousValue: 0 };
     }
-    brandAgg[metric][brand][entity] += Number(row.value);
+    if (row.year === currentYear) {
+      brandAgg[metric][brand].currentValue += Number(row.value);
+    } else if (row.year === previousYear) {
+      brandAgg[metric][brand].previousValue += Number(row.value);
+    }
   }
 
   for (const metric of metricKeys) {
     brandBreakdown[metric] = Object.entries(brandAgg[metric])
-      .map(([brand, values]) => ({
+      .map(([brand, data]) => ({
         brand,
-        gseb: values.gseb,
-        competitor: values.competitor,
+        entity: data.entity,
+        currentValue: data.currentValue,
+        previousValue: data.previousValue,
       }))
-      .sort((a, b) => (b.gseb + b.competitor) - (a.gseb + a.competitor));
+      .sort((a, b) => b.currentValue - a.currentValue);
   }
 
   // Organic vs Paid breakdown

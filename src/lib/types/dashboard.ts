@@ -28,8 +28,9 @@ export interface BrandMetric {
 
 export interface BrandBreakdown {
   brand: string;
-  gseb: number;
-  competitor: number;
+  entity: "gseb" | "competitor";
+  currentValue: number;
+  previousValue: number;
 }
 
 export interface OrganicPaidEntry {

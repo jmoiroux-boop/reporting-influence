@@ -41,17 +41,33 @@ export function formatDeltaAbsolute(delta: number): string {
 }
 
 /**
- * Format a large number in compact form (e.g., 1.2M, 456K).
+ * Format a large number in compact form for Y-axis ticks.
+ * Uses "k" suffix with french-style separators for values >= 100 000.
+ * Examples:
+ *   14 000 000 → "14 000k"
+ *   1 246 306  → "1 246k"
+ *   150 000    → "150k"
+ *   99 000     → "99 000"
+ *   227        → "227"
  */
 export function formatCompact(value: number): string {
-  if (Math.abs(value) >= 1_000_000_000) {
-    return `${(value / 1_000_000_000).toFixed(1)}B`;
+  const abs = Math.abs(value);
+  if (abs >= 100_000) {
+    const inK = Math.round(value / 1_000);
+    return `${formatNumber(inK)}k`;
   }
-  if (Math.abs(value) >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1)}M`;
+  return formatNumber(Math.round(value));
+}
+
+/**
+ * Format a number for chart labels/tooltips.
+ * Same logic as formatCompact but always with french thousands separators.
+ */
+export function formatChartValue(value: number): string {
+  const abs = Math.abs(value);
+  if (abs >= 100_000) {
+    const inK = Math.round(value / 1_000);
+    return `${formatNumber(inK)}k`;
   }
-  if (Math.abs(value) >= 1_000) {
-    return `${(value / 1_000).toFixed(1)}K`;
-  }
-  return value.toFixed(0);
+  return formatNumber(Math.round(value));
 }
