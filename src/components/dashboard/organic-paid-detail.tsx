@@ -45,10 +45,7 @@ export function OrganicPaidDetail({
                     <th className="text-left py-2 pr-4 font-medium text-seb-gray">
                       Marque
                     </th>
-                    <th className="text-left py-2 pr-4 font-medium text-seb-gray">
-                      Type
-                    </th>
-                    <th className="text-right py-2 px-3 font-medium text-seb-gray">
+<th className="text-right py-2 px-3 font-medium text-seb-gray">
                       {currentLabel}
                     </th>
                     <th className="text-right py-2 px-3 font-medium text-seb-gray">
@@ -73,27 +70,7 @@ export function OrganicPaidDetail({
                         <td className="py-2 pr-4 text-foreground font-medium">
                           {entry.brand}
                         </td>
-                        <td className="py-2 pr-4">
-                          <span
-                            className={cn(
-                              "inline-flex items-center gap-1",
-                              entry.entity === "gseb"
-                                ? "text-seb-red"
-                                : "text-seb-gray"
-                            )}
-                          >
-                            <span
-                              className={cn(
-                                "w-1.5 h-1.5 rounded-full",
-                                entry.entity === "gseb"
-                                  ? "bg-seb-red"
-                                  : "bg-seb-gray"
-                              )}
-                            />
-                            {entry.entity === "gseb" ? "GSEB" : "Comp."}
-                          </span>
-                        </td>
-                        <td className="text-right py-2 px-3 font-medium">
+<td className="text-right py-2 px-3 font-medium">
                           {formatCompact(entry.currentValue)}
                         </td>
                         <td className="text-right py-2 px-3 text-seb-gray">
