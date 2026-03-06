@@ -1,7 +1,7 @@
 "use client";
 
 import { Accordion } from "@/components/ui/accordion";
-import { formatNumber, formatDeltaPercent } from "@/lib/utils/format";
+import { formatCompact, formatDeltaPercent } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 import { METRIC_LABELS } from "@/lib/constants";
 import type { OrganicPaidEntry } from "@/lib/types/dashboard";
@@ -94,10 +94,10 @@ export function OrganicPaidDetail({
                           </span>
                         </td>
                         <td className="text-right py-2 px-3 font-medium">
-                          {formatNumber(entry.currentValue)}
+                          {formatCompact(entry.currentValue)}
                         </td>
                         <td className="text-right py-2 px-3 text-seb-gray">
-                          {formatNumber(entry.previousValue)}
+                          {formatCompact(entry.previousValue)}
                         </td>
                         <td className="text-right py-2 pl-3">
                           <span

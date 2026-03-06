@@ -33,11 +33,11 @@ export function formatDeltaPercent(percent: number): string {
 }
 
 /**
- * Format a delta absolute value with sign and thousands separators.
+ * Format a delta absolute value with sign and compact format.
  */
 export function formatDeltaAbsolute(delta: number): string {
   const sign = delta >= 0 ? "+" : "";
-  return `${sign}${formatNumber(delta)}`;
+  return `${sign}${formatCompact(delta)}`;
 }
 
 /**

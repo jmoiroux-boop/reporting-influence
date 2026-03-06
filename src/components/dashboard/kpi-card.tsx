@@ -2,7 +2,7 @@
 
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatNumber, formatDeltaPercent, formatDeltaAbsolute } from "@/lib/utils/format";
+import { formatCompact, formatDeltaPercent, formatDeltaAbsolute } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 import type { KPIData } from "@/lib/types/dashboard";
 
@@ -63,7 +63,7 @@ export function KPICard({ kpi }: KPICardProps) {
                 </span>
               </div>
               <p className="text-2xl font-bold text-foreground">
-                {formatNumber(kpi.current.gseb)}
+                {formatCompact(kpi.current.gseb)}
               </p>
               <DeltaIndicator
                 deltaAbs={kpi.deltaAbsolute.gseb}
@@ -80,7 +80,7 @@ export function KPICard({ kpi }: KPICardProps) {
                 </span>
               </div>
               <p className="text-2xl font-bold text-foreground">
-                {formatNumber(kpi.current.competitor)}
+                {formatCompact(kpi.current.competitor)}
               </p>
               <DeltaIndicator
                 deltaAbs={kpi.deltaAbsolute.competitor}

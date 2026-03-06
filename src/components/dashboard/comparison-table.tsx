@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { formatNumber, formatDeltaPercent, formatDeltaAbsolute } from "@/lib/utils/format";
+import { formatCompact, formatDeltaPercent, formatDeltaAbsolute } from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 import type { KPIData } from "@/lib/types/dashboard";
 
@@ -113,11 +113,11 @@ export function ComparisonTable({
 
                     {/* Current year: GSEB */}
                     <td className="text-right px-4 py-4 font-semibold text-foreground border-l border-border">
-                      {formatNumber(kpi.current.gseb)}
+                      {formatCompact(kpi.current.gseb)}
                     </td>
                     {/* Current year: Competitors */}
                     <td className="text-right px-4 py-4 text-seb-gray">
-                      {formatNumber(kpi.current.competitor)}
+                      {formatCompact(kpi.current.competitor)}
                     </td>
                     {/* Current year: Écart GSEB vs Comp */}
                     <td className="text-right px-4 py-4">
@@ -140,11 +140,11 @@ export function ComparisonTable({
 
                     {/* Previous year: GSEB */}
                     <td className="text-right px-4 py-4 font-semibold text-foreground border-l border-border">
-                      {formatNumber(kpi.previous.gseb)}
+                      {formatCompact(kpi.previous.gseb)}
                     </td>
                     {/* Previous year: Competitors */}
                     <td className="text-right px-4 py-4 text-seb-gray">
-                      {formatNumber(kpi.previous.competitor)}
+                      {formatCompact(kpi.previous.competitor)}
                     </td>
                     {/* Previous year: Écart GSEB vs Comp */}
                     <td className="text-right px-6 py-4">
