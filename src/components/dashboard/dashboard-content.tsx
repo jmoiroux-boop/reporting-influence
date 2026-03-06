@@ -25,15 +25,10 @@ export function DashboardContent({ isAdmin }: DashboardContentProps) {
   const [selectedMetric, setSelectedMetric] =
     useState<MetricType>("influencers_activated");
 
-  const currentYear = 2025;
-  const previousYear = 2024;
-
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `/api/data?currentYear=${currentYear}&previousYear=${previousYear}`
-      );
+      const response = await fetch("/api/data");
       if (response.ok) {
         const result = await response.json();
         setData(result);
@@ -70,6 +65,12 @@ export function DashboardContent({ isAdmin }: DashboardContentProps) {
     );
   }
 
+  // Period labels from Excel sheet tab names
+  const currentYear = data.currentYear;
+  const previousYear = data.previousYear;
+  const currentLabel = data.periodLabels[currentYear] || `${currentYear}`;
+  const previousLabel = data.periodLabels[previousYear] || `${previousYear}`;
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -81,7 +82,7 @@ export function DashboardContent({ isAdmin }: DashboardContentProps) {
           <div className="flex items-center gap-3 mt-1">
             <div className="flex items-center gap-1.5 text-sm text-seb-gray">
               <Calendar className="h-3.5 w-3.5" />
-              T1 {currentYear} vs T1 {previousYear}
+              {currentLabel} vs {previousLabel}
             </div>
             {data.lastUpload && (
               <span className="text-xs text-seb-gray-light">
@@ -111,8 +112,8 @@ export function DashboardContent({ isAdmin }: DashboardContentProps) {
       <section>
         <ComparisonTable
           kpis={data.kpis}
-          currentYear={currentYear}
-          previousYear={previousYear}
+          currentLabel={currentLabel}
+          previousLabel={previousLabel}
         />
         <CommentSection section="engagement" isAdmin={isAdmin} />
       </section>
@@ -142,9 +143,9 @@ export function DashboardContent({ isAdmin }: DashboardContentProps) {
         <BrandBarChart
           data={data.brandBreakdown[selectedMetric] || []}
           title={METRIC_LABELS[selectedMetric]}
-          subtitle={`T1 ${currentYear} vs T1 ${previousYear} — GSEB vs Competitors`}
-          currentYear={currentYear}
-          previousYear={previousYear}
+          subtitle={`${currentLabel} vs ${previousLabel} — GSEB vs Competitors`}
+          currentLabel={currentLabel}
+          previousLabel={previousLabel}
         />
         <CommentSection section="brand_breakdown" isAdmin={isAdmin} />
       </section>
@@ -156,8 +157,8 @@ export function DashboardContent({ isAdmin }: DashboardContentProps) {
         </h2>
         <OrganicPaidDetail
           data={data.organicPaid}
-          currentYear={currentYear}
-          previousYear={previousYear}
+          currentLabel={currentLabel}
+          previousLabel={previousLabel}
         />
         <CommentSection section="organic_paid" isAdmin={isAdmin} />
       </section>

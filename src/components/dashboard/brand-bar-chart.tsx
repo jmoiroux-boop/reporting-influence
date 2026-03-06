@@ -21,8 +21,8 @@ interface BrandBarChartProps {
   data: BrandBreakdown[];
   title: string;
   subtitle?: string;
-  currentYear: number;
-  previousYear: number;
+  currentLabel: string;
+  previousLabel: string;
 }
 
 /** Colors for bars */
@@ -122,8 +122,8 @@ export function BrandBarChart({
   data,
   title,
   subtitle,
-  currentYear,
-  previousYear,
+  currentLabel,
+  previousLabel,
 }: BrandBarChartProps) {
   // Prepare chart data with precomputed delta
   const chartData: ChartRow[] = useMemo(() => {
@@ -217,7 +217,7 @@ export function BrandBarChart({
               {/* Current year bar — with delta % label on top */}
               <Bar
                 dataKey="currentValue"
-                name={`T1 ${currentYear}`}
+                name={currentLabel}
                 radius={[3, 3, 0, 0]}
                 maxBarSize={32}
               >
@@ -240,7 +240,7 @@ export function BrandBarChart({
               {/* Previous year bar — no labels */}
               <Bar
                 dataKey="previousValue"
-                name={`T1 ${previousYear}`}
+                name={previousLabel}
                 radius={[3, 3, 0, 0]}
                 maxBarSize={32}
               >
@@ -263,19 +263,19 @@ export function BrandBarChart({
         <div className="flex items-center justify-center gap-6 pt-3 text-xs text-seb-gray">
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: COLORS.gsebCurrent }} />
-            GSEB T1 {currentYear}
+            GSEB {currentLabel}
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: COLORS.gsebPrevious }} />
-            GSEB T1 {previousYear}
+            GSEB {previousLabel}
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: COLORS.competitorCurrent }} />
-            Comp. T1 {currentYear}
+            Comp. {currentLabel}
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: COLORS.competitorPrevious }} />
-            Comp. T1 {previousYear}
+            Comp. {previousLabel}
           </div>
         </div>
       </CardContent>

@@ -48,6 +48,12 @@ export interface DashboardData {
   kpis: KPIData[];
   brandBreakdown: Record<MetricType, BrandBreakdown[]>;
   organicPaid: OrganicPaidEntry[];
+  /** Period labels from Excel sheet tab names, keyed by year */
+  periodLabels: Record<number, string>;
+  /** Current year (most recent) */
+  currentYear: number;
+  /** Previous year */
+  previousYear: number;
   lastUpload: {
     id: string;
     fileName: string;

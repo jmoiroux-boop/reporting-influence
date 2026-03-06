@@ -39,6 +39,8 @@ export function validateFile(file: File): ValidationError[] {
 
 /**
  * Validate that the workbook has sheets containing year indicators.
+ * Dynamically detects years from sheet names (e.g. "Trimestre 1 2025", "Full Year 2024").
+ * Expects exactly 2 sheets with consecutive years.
  */
 export function validateSheetNames(
   sheetNames: string[]
@@ -46,27 +48,33 @@ export function validateSheetNames(
   const errors: ValidationError[] = [];
   const years = new Map<number, string>();
 
+  // Extract all 4-digit years from sheet names
+  const yearPattern = /\b(20\d{2})\b/;
   for (const name of sheetNames) {
-    if (name.includes("2024")) {
-      years.set(2024, name);
-    }
-    if (name.includes("2025")) {
-      years.set(2025, name);
+    const match = name.match(yearPattern);
+    if (match) {
+      const year = parseInt(match[1]);
+      years.set(year, name);
     }
   }
 
-  if (!years.has(2024)) {
+  if (years.size < 2) {
     errors.push({
       field: "sheets",
-      message: `Onglet 2024 introuvable. Onglets présents : ${sheetNames.join(", ")}`,
+      message: `Au moins 2 onglets avec des années différentes sont requis. Onglets trouvés : ${sheetNames.join(", ")}`,
     });
   }
 
-  if (!years.has(2025)) {
-    errors.push({
-      field: "sheets",
-      message: `Onglet 2025 introuvable. Onglets présents : ${sheetNames.join(", ")}`,
-    });
+  // Verify that the two years are consecutive (N and N-1)
+  if (years.size >= 2) {
+    const sortedYears = [...years.keys()].sort((a, b) => b - a);
+    const [currentYear, previousYear] = sortedYears;
+    if (currentYear - previousYear !== 1) {
+      errors.push({
+        field: "sheets",
+        message: `Les années doivent être consécutives (ex: 2025 et 2024). Trouvées : ${sortedYears.join(", ")}`,
+      });
+    }
   }
 
   return { years, errors };

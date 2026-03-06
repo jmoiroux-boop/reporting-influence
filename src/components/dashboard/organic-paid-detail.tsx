@@ -8,14 +8,14 @@ import type { OrganicPaidEntry } from "@/lib/types/dashboard";
 
 interface OrganicPaidDetailProps {
   data: OrganicPaidEntry[];
-  currentYear: number;
-  previousYear: number;
+  currentLabel: string;
+  previousLabel: string;
 }
 
 export function OrganicPaidDetail({
   data,
-  currentYear,
-  previousYear,
+  currentLabel,
+  previousLabel,
 }: OrganicPaidDetailProps) {
   if (data.length === 0) return null;
 
@@ -49,10 +49,10 @@ export function OrganicPaidDetail({
                       Type
                     </th>
                     <th className="text-right py-2 px-3 font-medium text-seb-gray">
-                      {currentYear}
+                      {currentLabel}
                     </th>
                     <th className="text-right py-2 px-3 font-medium text-seb-gray">
-                      {previousYear}
+                      {previousLabel}
                     </th>
                     <th className="text-right py-2 pl-3 font-medium text-seb-gray">
                       Variation
@@ -125,14 +125,14 @@ export function OrganicPaidDetail({
   return (
     <div className="space-y-3">
       <Accordion
-        title={`Organic ${currentYear} vs ${previousYear}`}
+        title={`Organic ${currentLabel} vs ${previousLabel}`}
         subtitle={`${organic.length} entrées`}
       >
         {renderTable(organic)}
       </Accordion>
 
       <Accordion
-        title={`Paid ${currentYear} vs ${previousYear}`}
+        title={`Paid ${currentLabel} vs ${previousLabel}`}
         subtitle={`${paid.length} entrées`}
       >
         {renderTable(paid)}

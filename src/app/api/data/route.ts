@@ -16,9 +16,34 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
-  const { searchParams } = new URL(request.url);
-  const currentYear = parseInt(searchParams.get("currentYear") || "2025");
-  const previousYear = parseInt(searchParams.get("previousYear") || "2024");
+  // Fetch the last completed upload to get period labels and years
+  const { data: lastUploadData } = await supabase
+    .from("uploads")
+    .select("id, file_name, created_at, metadata")
+    .eq("status", "completed")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  // Extract years and period labels from upload metadata
+  const metadata = lastUploadData?.metadata as {
+    sheetNames?: string[];
+    years?: number[];
+  } | null;
+
+  const uploadYears = metadata?.years ?? [];
+  const sheetNames = metadata?.sheetNames ?? [];
+
+  // Build periodLabels: year → sheet tab name
+  const periodLabels: Record<number, string> = {};
+  for (let i = 0; i < uploadYears.length; i++) {
+    periodLabels[uploadYears[i]] = sheetNames[i] || `${uploadYears[i]}`;
+  }
+
+  // Determine current/previous from uploaded data (most recent year = current)
+  const sortedYears = [...uploadYears].sort((a, b) => b - a);
+  const currentYear = sortedYears[0] ?? 2025;
+  const previousYear = sortedYears[1] ?? currentYear - 1;
 
   // Fetch all influence data for both years
   const { data: rawData, error } = await supabase
@@ -35,6 +60,9 @@ export async function GET(request: Request) {
       kpis: [],
       brandBreakdown: {} as Record<MetricType, BrandBreakdown[]>,
       organicPaid: [],
+      periodLabels,
+      currentYear,
+      previousYear,
       lastUpload: null,
     };
     return NextResponse.json(emptyData);
@@ -173,19 +201,13 @@ export async function GET(request: Request) {
     }
   );
 
-  // Last upload info
-  const { data: lastUploadData } = await supabase
-    .from("uploads")
-    .select("id, file_name, created_at")
-    .eq("status", "completed")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
-
   const dashboardData: DashboardData = {
     kpis,
     brandBreakdown,
     organicPaid,
+    periodLabels,
+    currentYear,
+    previousYear,
     lastUpload: lastUploadData
       ? {
           id: lastUploadData.id,

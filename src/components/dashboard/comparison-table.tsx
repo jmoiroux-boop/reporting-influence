@@ -7,14 +7,14 @@ import type { KPIData } from "@/lib/types/dashboard";
 
 interface ComparisonTableProps {
   kpis: KPIData[];
-  currentYear: number;
-  previousYear: number;
+  currentLabel: string;
+  previousLabel: string;
 }
 
 export function ComparisonTable({
   kpis,
-  currentYear,
-  previousYear,
+  currentLabel,
+  previousLabel,
 }: ComparisonTableProps) {
   if (kpis.length === 0) return null;
 
@@ -38,14 +38,14 @@ export function ComparisonTable({
                   colSpan={3}
                   className="text-center px-2 py-2 font-semibold text-seb-gray border-l border-border"
                 >
-                  T1 {currentYear}
+                  {currentLabel}
                 </th>
                 {/* T1 Previous Year columns */}
                 <th
                   colSpan={3}
                   className="text-center px-2 py-2 font-semibold text-seb-gray border-l border-border"
                 >
-                  T1 {previousYear}
+                  {previousLabel}
                 </th>
               </tr>
               <tr className="border-b border-border bg-seb-cream/30">
